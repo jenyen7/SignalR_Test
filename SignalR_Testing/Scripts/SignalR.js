@@ -1,13 +1,33 @@
 ﻿(function () {
+    var chat = $.connection.chat;
+
     $.connection.hub.start()
         .done(function () {
-            console.log("it worked!");
-            console.log($.connection.myHub)
-            $.connection.myHub.server.announce("connected");
+            $.connection.hub.logging = true;
+            writeToPage("It worked!");
+            $.connection.hub.log("Connected");
+            //console.log($.connection.myHub)
+            chat.server.announceToEveryBody("Connected!");
         })
-        .fail(function () { alert("error"); });
+        .fail(function () {
+            writeToPage("Error connecting to SignalR...");
+        });
 
-    $.connection.myHub.client.announce = function (message) {
-        $("#welcome-messages").append(message);
+    chat.client.announce = function (message) {
+        writeToPage(message);
     };
+
+    var writeToPage = function (message) {
+        $("#welcome-messages").append(message + "<br />");
+    };
+
+    $("#click-me").on("click", function () {
+        chat.server.getServerDateTime()
+            .done(function (data) {
+                writeToPage(data)
+            })
+            .fail(function (e) {
+                writeToPage(e)
+            })
+    })
 })()

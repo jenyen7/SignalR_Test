@@ -7,14 +7,10 @@ using System.Web;
 
 namespace SignalR_Testing
 {
-    //[HubName("chat")]
-    [HubName("chatHub")]
+    [HubName("chat")]
+    //[HubName("chatHub")]
     public class ChatHub : Hub
     {
-        //public void Hello()
-        //{
-        //    Clients.All.hello();
-        //}
         public void Send(string name, string message)
         {
             // Call the broadcastMessage method to update clients.
@@ -27,9 +23,14 @@ namespace SignalR_Testing
             Clients.All.Announce(message);
         }
 
-        public DateTime GetServerDateTime()
+        public string GetServerDateTime()
         {
-            return DateTime.Now;
+            return "於" + DateTime.Now.ToString("MM-dd hh:mm");
+        }
+
+        public void Broadcast(string name, string message)
+        {
+            Clients.All.showmessage(name, message);
         }
 
         //public void GetServerDateTime()

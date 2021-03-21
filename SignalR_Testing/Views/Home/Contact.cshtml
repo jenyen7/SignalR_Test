@@ -1,17 +1,64 @@
 ﻿@{
     ViewBag.Title = "Contact";
 }
-<h2>@ViewBag.Title.</h2>
-<h3>@ViewBag.Message</h3>
+@*<h2>@ViewBag.Title.</h2>
+    <h3>@ViewBag.Message</h3>*@
 
-<address>
-    One Microsoft Way<br />
-    Redmond, WA 98052-6399<br />
-    <abbr title="Phone">P:</abbr>
-    425.555.0100
-</address>
+<h2>聊天室</h2>
+<div style="display:flex;margin-bottom:10px">
+    <input type="text" placeholder="暱稱" id="textName" class="form-control" style="width:150px" />
+    <input type="text" placeholder="想說的話" id="textMsg" class="form-control" />
+    <input type="button" value="送出" id="click-me" class="btn btn-primary" />
+</div>
+<div style="background-color:darkgray;color:white;border-radius:3px;padding:15px;font-size:16px" id="welcome-messages"></div>
 
-<address>
-    <strong>Support:</strong>   <a href="mailto:Support@example.com">Support@example.com</a><br />
-    <strong>Marketing:</strong> <a href="mailto:Marketing@example.com">Marketing@example.com</a>
-</address>
+@section scripts {
+    <script src="~/Scripts/jquery.signalR-2.2.2.min.js"></script>
+    <script src="~/signalr/js"></script>
+    <script>
+        (function () {
+            var chat = $.connection.chat;
+            chat.client.showmessage = function (name, message) {
+                $("#welcome-messages").append("<span style='font-weight:bold'>" + name + "</span>: " + message + "<br />");
+            };
+            chat.client.announce = function (message) {
+                writeToPage(message);
+            };
+            var writeToPage = function (message) {
+                $("#welcome-messages").append(message + "<br />");
+            };
+
+            $.connection.hub.start()
+                .done(function () {
+                    chat.server.announceToEveryBody("..加入聊天室。");
+                })
+                .fail(function () {
+                    writeToPage("連線失敗。");
+                });
+
+            $("#click-me").on("click", function () {
+                chat.server.broadcast($("#textName").val(), $("#textMsg").val());
+                chat.server.getServerDateTime()
+                    .done(function (data) {
+                        writeToPage(data);
+                        $('#textMsg').val('');
+                    })
+                    .fail(function (e) {
+                        writeToPage(e)
+                    })
+            })
+        })()
+    </script>
+}
+
+@*<address>
+        One Microsoft Way<br />
+        Redmond, WA 98052-6399<br />
+        <abbr title="Phone">P:</abbr>
+        425.555.0100
+    </address>
+
+    <address>
+        <strong>Support:</strong>   <a href="mailto:Support@example.com">Support@example.com</a><br />
+        <strong>Marketing:</strong> <a href="mailto:Marketing@example.com">Marketing@example.com</a>
+    </address>*@
